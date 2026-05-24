@@ -1,3 +1,5 @@
+import os
+import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class http_handler(BaseHTTPRequestHandler):
@@ -7,7 +9,12 @@ class http_handler(BaseHTTPRequestHandler):
         self.send_header("Content-type", "text/plain")
         self.end_headers()
 
-        test_message = 'Server working\n'
+        print(os.getcwd())
+
+        with open('sys_info.json', 'r') as file:
+            data = json.load(file)
+
+        test_message = str(data)
         self.wfile.write(test_message.encode('utf-8'))
 
 def run_server(port=1690):
