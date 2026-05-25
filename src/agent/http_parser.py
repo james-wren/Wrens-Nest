@@ -4,19 +4,27 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 def default_handler():
-    with open('../stores/sys_info.json', 'r') as file:
+    with open('./storage/sys_info.json', 'r') as file:
         data = json.load(file)
 
     return data
 
-def getUsageData():
-    with open('../stores/sys_info.json', 'r') as file:
-        data = json.load(file)
+def getMem():
+    with open('/proc/meminfo', 'r') as file:
+        content = file.readlines()
 
-    return data["usage_data"]
+    mem = {}
+
+    for line in content:
+        line_split = line.split()
+
+        line_split[0] = line_split[0].replace(':', '')
+
+        mem[line_split[0]] = line_split[1]
+    return mem
 
 ACTIONS = {
-    'usage': getUsageData
+    'mem': getMem
 }
 
 class http_handler(BaseHTTPRequestHandler):
