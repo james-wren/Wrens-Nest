@@ -11,12 +11,14 @@ int getServerNum(){
     return 5; //CHANGE
 }
 
+// Function to execute a command over ssh
 std::string remoteExec(std::string cmd, std::string key_path, std::string user, std::string ip){
     std::string full_cmd = "ssh -i " + key_path + " " + user + "@" + ip + " " + " '" + cmd + "'";
     int result =  system(full_cmd.c_str());
     return result == 0  ? "Success " : "Failed " + full_cmd;
 }
 
+// Function to send a file to a server
 std::string scpServ(std::string file_path, std::string loco_path, std::string ip, std::string user, std::string key_path) {
     std::string cmd = "scp -i " + key_path + " " + file_path + " " + user + "@" + ip + ":" + loco_path;
     int result = system(cmd.c_str());
