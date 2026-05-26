@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
                 std::string user = argv[4];
                 std::string ip = argv[5];
                 std::string keypath = argv[6];
-                addServ(name, user, ip, keypath);
+                return addServ(name, user, ip, keypath);
             }
 
             if (action == "start") {
