@@ -1,8 +1,0 @@
-{
-    "name":"localhost",
-    "os":"Debian",
-    "usage_data": {
-        "cpu":"10%",
-        "ram":"1/5gb"
-    }
-}
