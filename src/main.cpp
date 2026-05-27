@@ -5,8 +5,14 @@
 #include <climits>
 #include "unistd.h"
 #include "agents.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
+
+const std::string HOME_DIR = getHome();
 
 int setup(){
+    
     std::cout << "Starting install" << std::endl;
 
     const std::string target_dir =  "/usr/local/bin/";
@@ -31,6 +37,14 @@ int setup(){
     int main_result = system(main_folder_cmd.c_str());
     int temp_result = system(temp_folder_cmd.c_str());
     int data_result = system(data_folder_cmd.c_str());
+
+    json data = {};
+
+    std::ofstream dataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
+    if (dataFile.is_open()){
+        dataFile << data;
+        dataFile.close();
+    }
 
     return 0;
 }
