@@ -49,7 +49,7 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     // Take python script and save it to file for transfer
     std::ofstream agentFile(HOME_DIR + "/.wrens_nest/temp/agent.py");
     if (agentFile.is_open()){
-        agentFile << _home_tag_Documents_Server_Manager_scripts_http_parser_py;
+        agentFile << http_parser_py;
         agentFile.close();
     }
 

@@ -16,7 +16,8 @@ foreach(SCRIPT ${SCRIPTS})
     get_filename_component(SCRIPT_NAME ${SCRIPT} NAME_WE)
     add_custom_command(
         OUTPUT "src/embedded/${SCRIPT_NAME}_py.h"
-        COMMAND xxd -i ${SCRIPT} > "${CMAKE_SOURCE_DIR}/src/embedded/${SCRIPT_NAME}_py.h"
+        COMMAND xxd -i ${SCRIPT_NAME}.py > "${CMAKE_SOURCE_DIR}/src/embedded/${SCRIPT_NAME}_py.h"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/scripts"
         DEPENDS ${SCRIPT}
         COMMENT "Embedding ${SCRIPT_NAME}.py"
     )
