@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <filesystem>
 
 #include "json.hpp"
 #include "main.h"
@@ -9,14 +10,20 @@
 #include "embedded/http_parser_py.h"
 
 using json = nlohmann::json;
-
-int getServerNum(){
-    return 5; // CHANGE
-}
+namespace fs = std::filesystem;
 
 std::string getHome(){
     const char* homeDir = std::getenv("HOME");
     return homeDir ? std::string(homeDir) : "";
+}
+
+const std::string HOME_DIR = getHome();
+
+int getServerNum(){
+    std::ifstream serverData(HOME_DIR + "/.wrens_nest/data/servers.json");
+    json data = json::parse(serverData);
+    int size = static_cast<int>(data.size());
+    return size; // CHANGE
 }
 
 // Function to execute a command over ssh
@@ -39,8 +46,6 @@ std::string scpServ(std::string file_path, std::string loco_path, std::string ip
 // 3. Save remoteley
 // 4. Save locally
 
-const std::string HOME_DIR = getHome();
-
 int addServ(std::string name, std::string username, std::string ip, std::string key_path) {
     // Create directory for incoming files on server
     std::cout << remoteExec("mkdir -p ~/.wrens_nest/", key_path, username, ip) << std::endl;
@@ -48,7 +53,7 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     const std::string AES_KEY = keyGen(name);
 
     // Create json for server
-    int serverNum = getServerNum() + 1;
+    int serverNum = getServerNum();
     json config;
     config["id"] = serverNum;
     config["name"] = name;
@@ -57,18 +62,7 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     // Read current saved server data and save it as a variable to add to
     // Im done debugging ts, time to write the most bulletproof fucking code ever.
     std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
-    json serverData;
-    if (f.is_open()){
-        if (f.peek() == std::ifstream::traits_type::eof()) {
-            serverData = json::object();
-        }else {
-            try {
-                serverData = json::parse(f);
-            } catch (const json::parse_error& e) {
-                serverData = json::object();
-            }
-        }
-    }
+    json serverData = json::parse(f);
     
     // Adds new server data to the json data
     serverData[name] = {};
@@ -79,7 +73,7 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     // Updates the file with new data
     std::ofstream serverDataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
     if (serverDataFile.is_open()){
-        serverDataFile << serverData;
+        serverDataFile << serverData.dump();
         serverDataFile.close();
     }
 
@@ -99,6 +93,12 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     // Transfer files to server
     std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json", "~/.wrens_nest/", ip, username, key_path) << std::endl;
     std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent.py", "~/.wrens_nest/", ip, username, key_path) << std::endl;
+
+    // Remove temporary files
+    fs::path config_temp = HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json";
+    fs::path script_temp = HOME_DIR + "/.wrens_nest/temp/agent.py";
+    fs::remove(config_temp);
+    fs::remove(script_temp);
 
     return 0;
 }

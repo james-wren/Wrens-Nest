@@ -9,8 +9,9 @@
 
 using json = nlohmann::json;
 
+const std::string HOME_DIR = getHome();
+
 int setup(){
-    
     std::cout << "Starting install" << std::endl;
 
     const std::string target_dir =  "/usr/local/bin/";
@@ -36,11 +37,15 @@ int setup(){
     int temp_result = system(temp_folder_cmd.c_str());
     int data_result = system(data_folder_cmd.c_str());
 
-    json data = {};
+    std::string details = "DO NOT MODIFY, this is the system configuration file, all details are crucial to this programs function";
+    json data;
+    data["details"] = details;
+
+    std::cout << "Home dir test main: " + HOME_DIR << std::endl; 
 
     std::ofstream dataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
     if (dataFile.is_open()){
-        dataFile << data;
+        dataFile << data.dump();
         dataFile.close();
     }
 
