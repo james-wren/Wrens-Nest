@@ -1,8 +1,11 @@
 #include <cstdio>
 #include <iostream>
 #include <fstream>
-#include <json.hpp>
 #include <cstdlib>
+
+#include "json.hpp"
+#include "main.h"
+#include "encryption.h"
 #include "embedded/http_parser_py.h"
 
 using json = nlohmann::json;
@@ -31,8 +34,6 @@ std::string scpServ(std::string file_path, std::string loco_path, std::string ip
 }
 
 int addServ(std::string name, std::string username, std::string ip, std::string key_path) {
-    const std::string HOME_DIR = getHome();
-
     // Create json for server
     int serverNum = getServerNum() + 1;
     json config;
@@ -60,13 +61,12 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     std::cout << scpServ("~/.wrens_nest/temp/agent.py", "~/.wrens_nest/", ip, username, key_path) << std::endl;
 
     // Read current saved server data and save it as a variable to add to
-    std::ifstream f( HOME_DIR + "/.wrens_nest/data/servers.json");
+    std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
     json serverData = json::parse(f);
 
     // Adds new server data to the json data
-    std::string serverNumStr = std::to_string(serverNum);
-    serverData[serverNumStr] = {};
-    serverData[serverNumStr]["name"] = config["name"];
+    serverData[name] = {};
+    serverData[name]["id"] = serverNum;
 
     // Updates the file with new data
     std::ofstream serverDataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
