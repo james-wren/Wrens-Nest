@@ -9,8 +9,6 @@
 
 using json = nlohmann::json;
 
-const std::string HOME_DIR = getHome();
-
 int setup(){
     
     std::cout << "Starting install" << std::endl;

@@ -33,12 +33,55 @@ std::string scpServ(std::string file_path, std::string loco_path, std::string ip
     return result == 0 ? "Success " : "Failed " + cmd;
 }
 
+// Refactoring code to this order
+// 1. Prep remote server with directorys
+// 2. Create json variables and generate neccesary values
+// 3. Save remoteley
+// 4. Save locally
+
+const std::string HOME_DIR = getHome();
+
 int addServ(std::string name, std::string username, std::string ip, std::string key_path) {
+    // Create directory for incoming files on server
+    std::cout << remoteExec("mkdir -p ~/.wrens_nest/", key_path, username, ip) << std::endl;
+
+    const std::string AES_KEY = keyGen(name);
+
     // Create json for server
     int serverNum = getServerNum() + 1;
     json config;
     config["id"] = serverNum;
     config["name"] = name;
+    config["key"] = AES_KEY;
+    
+    // Read current saved server data and save it as a variable to add to
+    // Im done debugging ts, time to write the most bulletproof fucking code ever.
+    std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
+    json serverData;
+    if (f.is_open()){
+        if (f.peek() == std::ifstream::traits_type::eof()) {
+            serverData = json::object();
+        }else {
+            try {
+                serverData = json::parse(f);
+            } catch (const json::parse_error& e) {
+                serverData = json::object();
+            }
+        }
+    }
+    
+    // Adds new server data to the json data
+    serverData[name] = {};
+    serverData[name]["id"] = serverNum;
+    serverData[name]["key"] = AES_KEY;
+    
+
+    // Updates the file with new data
+    std::ofstream serverDataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
+    if (serverDataFile.is_open()){
+        serverDataFile << serverData;
+        serverDataFile.close();
+    }
 
     // Save config to temp file
     std::ofstream configFile(HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json");
@@ -53,27 +96,9 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
         agentFile << http_parser_py;
         agentFile.close();
     }
-
-    // Create directory for incoming files on server
-    std::cout << remoteExec("mkdir -p ~/.wrens_nest/", key_path, username, ip) << std::endl;
     // Transfer files to server
-    std::cout << scpServ("~/.wrens_nest/temp/agent_config_transfer.json", "~/.wrens_nest/", ip, username, key_path) << std::endl;
-    std::cout << scpServ("~/.wrens_nest/temp/agent.py", "~/.wrens_nest/", ip, username, key_path) << std::endl;
-
-    // Read current saved server data and save it as a variable to add to
-    std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
-    json serverData = json::parse(f);
-
-    // Adds new server data to the json data
-    serverData[name] = {};
-    serverData[name]["id"] = serverNum;
-
-    // Updates the file with new data
-    std::ofstream serverDataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
-    if (serverDataFile.is_open()){
-        serverDataFile << serverData;
-        serverDataFile.close();
-    }
+    std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json", "~/.wrens_nest/", ip, username, key_path) << std::endl;
+    std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent.py", "~/.wrens_nest/", ip, username, key_path) << std::endl;
 
     return 0;
 }

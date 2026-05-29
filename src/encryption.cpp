@@ -35,7 +35,7 @@ std::string encodeBase64(const std::vector<uint8_t>& binary_data){
     return base64_text;
 }
 
-int keyGen(std::string serverName) {
+std::string keyGen(std::string serverName) {
     const size_t AES_256_KEY_SIZE = 32;
     std::vector<uint8_t> key(AES_256_KEY_SIZE);
 
@@ -49,24 +49,12 @@ int keyGen(std::string serverName) {
 
         std::cout << "Critical error encountered in key generation: " << err_buf << std::endl;
 
-        return 1;
+        return "Failed";
     }
 
     std::cout << "Key generated succesfully" << std::endl;
     
-    std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
-    json data = json::parse(f);
     std::string text_key = encodeBase64(key);
 
-    data[serverName]["key"] = text_key;
-
-    std::ofstream f_out(HOME_DIR + "/.wrens_nest/data/servers.json");
-    if (!f_out){
-        return 1;
-    }
-
-    f_out << data.dump(4);
-    f_out.close();
-
-    std::cout << "Encryption key succsefully saved to data" << std::endl;
+    return text_key;
 }

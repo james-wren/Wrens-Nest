@@ -1,3 +1,3 @@
 #include <iostream>
 
-int keyGen(std::string servesrName);
+std::string keyGen(std::string serverName);

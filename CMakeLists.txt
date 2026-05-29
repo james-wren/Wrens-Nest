@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(wn)
 
+find_package(OpenSSL REQUIRED)
+
 set(CMAKE_CXX_STANDARD 17)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -26,4 +28,5 @@ endforeach()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${EMBEDDED_HEADERS})
 
+target_link_libraries(wn PRIVATE OpenSSL::Crypto)
 target_include_directories(${PROJECT_NAME} PRIVATE include)

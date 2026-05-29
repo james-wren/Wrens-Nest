@@ -1,3 +1,5 @@
 build/
 .vscode/
 secrets/
+tests/
+.wakatime-project
