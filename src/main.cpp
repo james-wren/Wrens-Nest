@@ -112,7 +112,8 @@ int main(int argc, char* argv[]) {
                 std::vector<std::string> selections;
                 for (int i = 3; i < argc; i++){
                     selections.push_back(argv[i]);
-                    //add start logic
+                    std::string name = argv[i];
+                    startServer(name);
                 }
             }
         }

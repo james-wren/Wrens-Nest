@@ -23,7 +23,7 @@ int getServerNum(){
     std::ifstream serverData(HOME_DIR + "/.wrens_nest/data/servers.json");
     json data = json::parse(serverData);
     int size = static_cast<int>(data.size());
-    return size; // CHANGE
+    return size;
 }
 
 // Function to execute a command over ssh
@@ -58,6 +58,9 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     config["id"] = serverNum;
     config["name"] = name;
     config["key"] = AES_KEY;
+    config["user"] = username;
+    config["ip"] = ip;
+    config["ssh_key"] = key_path;
     
     // Read current saved server data and save it as a variable to add to
     // Im done debugging ts, time to write the most bulletproof fucking code ever.
@@ -67,7 +70,10 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     // Adds new server data to the json data
     serverData[name] = {};
     serverData[name]["id"] = serverNum;
+    serverData[name]["user"] = username;
+    serverData[name]["ip"] = ip;
     serverData[name]["key"] = AES_KEY;
+    serverData[name]["ssh_key"] = key_path;
     
 
     // Updates the file with new data
@@ -99,6 +105,18 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     fs::path script_temp = HOME_DIR + "/.wrens_nest/temp/agent.py";
     fs::remove(config_temp);
     fs::remove(script_temp);
+
+    return 0;
+}
+
+int startServer(std::string name){
+    std::ifstream f(HOME_DIR + "/.wrens_nest/data/servers.json");
+    json serverData = json::parse(f);
+    json server = serverData[name];
+
+    std::cout << "starting server: " + name << std::endl;
+
+    remoteExec("[Command to start server]", server["ssh_key"], server["user"], server["ip"]);
 
     return 0;
 }
