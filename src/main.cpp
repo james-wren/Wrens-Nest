@@ -6,6 +6,7 @@
 #include "unistd.h"
 #include "agents.h"
 #include "json.hpp"
+#include "monitor.h"
 
 using json = nlohmann::json;
 
@@ -18,7 +19,7 @@ int setup(){
 
     // Check current directory
     char result[PATH_MAX];
-    ssize_t count = readlink("/proc/self/exe", result, PATH_MAX);
+    size_t count = readlink("/proc/self/exe", result, PATH_MAX);
     std::string absolute_binary_path = (count != -1) ? std::string(result, count) : "";
 
     // Move self to target dir
@@ -65,11 +66,13 @@ int main(int argc, char* argv[]) {
     if (verify_setup(test_folder) == 1){
         if (setup() != 0) {
             std::cout << "Failed to setup program, aborting" << std::endl;
+            return 1;
         } else {
             std::cout << "Installation finished, program is ready." << std::endl;
+            return 0;
         }
     } else {
-        std::cout << "Installation verrifyed" << std::endl;
+        std::cout << "Installation verrified" << std::endl;
     }
 
     std::string response;
@@ -84,6 +87,7 @@ int main(int argc, char* argv[]) {
         -s or --status : Status quick view
 
         Uses:
+            wn
             wn -m [action] [options]
 
         Manage:
@@ -93,7 +97,7 @@ int main(int argc, char* argv[]) {
                 IP   : IP of server
                 Key  : Path to private key on users computer (Optional)
             
-            wn -m start/stop [selection 1] [selection 2] [etc]
+            wn -m start/stop [selections]
                 selection : List servers to start or stop seperated by spaces (ex. dev_server web_server).
             )";
         }
@@ -117,8 +121,21 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
+    } else {
+        std::string jsonPath = HOME_DIR + "/.wrens_nest/data/servers.json";
+        std::ifstream jsonFile(jsonPath.c_str());
+        
+        json serverData = json::parse(jsonFile);
+
+        std::cout << "Json content" + serverData.dump() << std::endl;
+
+        for (auto& [key, value] : serverData.items()){
+            if (key != "details"){
+                std::list<std::string> selections = {"status"};
+                getStats(selections, key);
+            }
+        }
     }
-    
     std::cout << response << std::endl;
     return 0;
 }
