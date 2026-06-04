@@ -7,6 +7,7 @@
 #include "agents.h"
 #include "json.hpp"
 #include "monitor.h"
+#include "tui.h"
 
 using json = nlohmann::json;
 
@@ -127,14 +128,14 @@ int main(int argc, char* argv[]) {
         
         json serverData = json::parse(jsonFile);
 
-        std::cout << "Json content" + serverData.dump() << std::endl;
+        // for (auto& [key, value] : serverData.items()){
+        //     if (key != "details"){
+        //         std::list<std::string> selections = {"status"};
+        //         getStats(selections, key);
+        //     }
+        // }
 
-        for (auto& [key, value] : serverData.items()){
-            if (key != "details"){
-                std::list<std::string> selections = {"status"};
-                getStats(selections, key);
-            }
-        }
+        homeScreen();
     }
     std::cout << response << std::endl;
     return 0;
