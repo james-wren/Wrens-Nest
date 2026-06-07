@@ -7,7 +7,7 @@
 #include "json.hpp"
 #include "main.h"
 #include "encryption.h"
-#include "embedded/http_parser_py.h"
+#include "embedded/agent_go.h"
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -90,19 +90,19 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
         configFile.close();
     }
 
-    // Take python script and save it to file for transfer
-    std::ofstream agentFile(HOME_DIR + "/.wrens_nest/temp/agent.py");
+    // Take go script and save it to file for transfer
+    std::ofstream agentFile(HOME_DIR + "/.wrens_nest/temp/agent", std::ios::out | std::ios::binary);
     if (agentFile.is_open()){
-        agentFile << http_parser_py;
+        agentFile.write(reinterpret_cast<const char*>(agent), agent_len);
         agentFile.close();
     }
     // Transfer files to server
     std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json", "~/.wrens_nest/", ip, username, key_path) << std::endl;
-    std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent.py", "~/.wrens_nest/", ip, username, key_path) << std::endl;
+    std::cout << scpServ(HOME_DIR + "/.wrens_nest/temp/agent", "~/.wrens_nest/", ip, username, key_path) << std::endl;
 
     // Remove temporary files
     fs::path config_temp = HOME_DIR + "/.wrens_nest/temp/agent_config_transfer.json";
-    fs::path script_temp = HOME_DIR + "/.wrens_nest/temp/agent.py";
+    fs::path script_temp = HOME_DIR + "/.wrens_nest/temp/agent";
     fs::remove(config_temp);
     fs::remove(script_temp);
 

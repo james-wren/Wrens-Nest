@@ -30,16 +30,17 @@ endif()
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # GO agent script embedding
-file(GLOB SCRIPTS "scripts/*.go")
+file(GLOB SCRIPTS "agent/agent")
+file(GLOB SCRIPTS "agent/agent_64")
 
 foreach(SCRIPT ${SCRIPTS})
     get_filename_component(SCRIPT_NAME ${SCRIPT} NAME_WE)
     add_custom_command(
         OUTPUT "src/embedded/${SCRIPT_NAME}_go.h"
-        COMMAND xxd -i ${SCRIPT_NAME}.go > "${CMAKE_SOURCE_DIR}/src/embedded/${SCRIPT_NAME}_go.h"
-        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/scripts"
+        COMMAND xxd -i ${SCRIPT_NAME} > "${CMAKE_SOURCE_DIR}/src/embedded/${SCRIPT_NAME}_go.h"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/agent"
         DEPENDS ${SCRIPT}
-        COMMENT "Embedding ${SCRIPT_NAME}.go"
+        COMMENT "Embedding ${SCRIPT_NAME}"
     )
     list(APPEND EMBEDDED_HEADERS "src/embedded/${SCRIPT_NAME}_go.h")
 endforeach()
