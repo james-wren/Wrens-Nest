@@ -3,3 +3,5 @@ build/
 secrets/
 tests/
 .wakatime-project
+server/cert.pem
+server/key.pem
