@@ -28,6 +28,8 @@ class serverHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
 
             self.wfile.write(json.dumps(content).encode("utf-8"))
+        else:
+            self.send_response_only(404)
 
 server_add = ("localhost", 1690)
 
