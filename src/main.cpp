@@ -8,6 +8,7 @@
 #include "json.hpp"
 #include "monitor.h"
 #include "tui.h"
+#include "main.h"
 
 using json = nlohmann::json;
 
@@ -23,13 +24,6 @@ int setup(){
     size_t count = readlink("/proc/self/exe", result, PATH_MAX);
     std::string absolute_binary_path = (count != -1) ? std::string(result, count) : "";
 
-    // Move self to target dir
-    std::string command = "sudo cp \"" + absolute_binary_path + "\" \"" + target_dir + "wn" + "\" && sudo chmod +x \"" + target_dir + "wn" + "\"";
-    int bin_result = system(command.c_str());
-    if (bin_result != 0) {
-        return 1;
-    }
-
     // Create storage files
     std::string main_folder_cmd = "mkdir ~/.wrens_nest/";
     std::string temp_folder_cmd = "mkdir ~/.wrens_nest/temp/";
@@ -39,16 +33,45 @@ int setup(){
     int temp_result = system(temp_folder_cmd.c_str());
     int data_result = system(data_folder_cmd.c_str());
 
+    cpr::Response r = cpr::Get(
+        cpr::Url{"https://localhost:1690/register"},
+        cpr::Ssl(
+            cpr::ssl::VerifyHost{false},
+            cpr::ssl::VerifyPeer{false}
+        )
+    );
+
+    if (r.status_code != 200) {
+        std::cout << "Proxy registration failed with status code: " << r.status_code << std::endl;
+        return 1;
+    }
+
+    json uid = json::parse(r.text);
+    int uid_num = uid["uid"];
+
+    json info;
+    info["uid"] = uid_num;
+    std::ofstream infoFile(HOME_DIR + "/.wrens_nest/data/info.json");
+    if (infoFile.is_open()){
+        infoFile << info.dump();
+        infoFile.close(); 
+    }
+
     std::string details = "DO NOT MODIFY, this is the system configuration file, all details are crucial to this programs function";
     json data;
     data["details"] = details;
-
-    std::cout << "Home dir test main: " + HOME_DIR << std::endl; 
 
     std::ofstream dataFile(HOME_DIR + "/.wrens_nest/data/servers.json");
     if (dataFile.is_open()){
         dataFile << data.dump();
         dataFile.close();
+    }
+
+    // Move self to target dir, made this the final step as it also serves as the installation check
+    std::string command = "sudo cp \"" + absolute_binary_path + "\" \"" + target_dir + "wn" + "\" && sudo chmod +x \"" + target_dir + "wn" + "\"";
+    int bin_result = system(command.c_str());
+    if (bin_result != 0) {
+        return 1;
     }
 
     return 0;
