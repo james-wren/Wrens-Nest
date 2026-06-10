@@ -1,49 +1,46 @@
-import http.server
-import ssl
 import json
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import StreamingResponse
+from datetime import datetime, timedelta
+import uvicorn
+import asyncio
 
-class serverHandler(http.server.BaseHTTPRequestHandler):
-    def do_GET(self):
-        if self.path == "/register":
-            with open("clients.json", "r") as file:
-                data = json.load(file)
+with open("clients.json", "r") as file:
+    clients = json.load(file)
+
+app = FastAPI()
+@app.get("/register")
+async def register():
+    uid = len(clients)
+
+    clients[str(uid)] = {"status": 1} #status 1 is ofline, 0 is online
+
+    return {"uid": uid}
+
+@app.get("/open/{uid}")
+async def open_session(uid: int, request: Request):
+    if str(uid) not in clients:
+        raise HTTPException(status_code=404, detail="uid not found")
+    ip = request.client.host
+    clients[str(uid)]["ip"] = ip
+
+    expire = (datetime.now() + timedelta(minutes=5)).isoformat()
+    clients[str(uid)]["expi"] = expire
+
+    clients[str(uid)]["status"] = 0
+
+@app.get("/wait/{uid}")
+async def wait(uid: int):
+    async def stream():
+        while True:
+            entry = clients.get(str(uid))
+            if entry["status"] == 0:
+                if datetime.fromisoformat(clients[str(uid)]["expi"]) > datetime.now():
+                    yield entry["ip"]
+                break
             
-            uid = len(data)
+            yield "\n"
+            await asyncio.sleep(1)
 
-            content = {
-                "uid" : uid
-            }
 
-            print(content)
-            print(uid)
-
-            data[str(uid)] = {}
-
-            with open("clients.json", "w") as file:
-                json.dump(data, file, indent=4)
-
-            self.send_response(200)
-
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-
-            self.wfile.write(json.dumps(content).encode("utf-8"))
-        else:
-            self.send_response_only(404)
-
-server_add = ("localhost", 1690)
-
-httpd = http.server.HTTPServer(server_add, serverHandler)
-
-context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-
-context.load_cert_chain(certfile="cert.pem", keyfile="key.pem")
-
-httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-
-print("Serving")
-try:
-    httpd.serve_forever()
-except KeyboardInterrupt:
-    print("Stopped")
-
+uvicorn.run(app, host="0.0.0.0", port=1690)
