@@ -1,1 +1,2 @@
 src/embedded/** linguist-generated=true
+include/json.hpp linguist-vendored
