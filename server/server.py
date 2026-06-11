@@ -32,15 +32,24 @@ async def open_session(uid: int, request: Request):
 @app.get("/wait/{uid}")
 async def wait(uid: int):
     async def stream():
-        while True:
-            entry = clients.get(str(uid))
-            if entry["status"] == 0:
-                if datetime.fromisoformat(clients[str(uid)]["expi"]) > datetime.now():
-                    yield entry["ip"]
-                break
-            
-            yield "\n"
-            await asyncio.sleep(1)
+        connected = False
+        while not connected:
+            for i in range(12):
+                entry = clients.get(str(uid))
+                if entry["status"] == 0:
+                    if datetime.fromisoformat(entry["expi"]) > datetime.now():
+                        yield entry["ip"]
+                        connected = True
+                        break
+                    else:
+                        entry["status"] = 1
+                if not connected:
+                    await asyncio.sleep(5)
+                    break
+            if not connected:
+                yield "\n"
+
+    return StreamingResponse(stream(), media_type="text/plain")
 
 
 uvicorn.run(app, host="0.0.0.0", port=1690)
