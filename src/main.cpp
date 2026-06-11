@@ -19,6 +19,15 @@ int setup(){
 
     const std::string target_dir =  "/usr/local/bin/";
 
+    cpr::Response r = cpr::Get(
+        cpr::Url{"http://localhost:1690/register"}
+    );
+
+    if (r.status_code != 200) {
+        std::cout << "Proxy registration failed with status code: " << r.status_code << std::endl;
+        return 1;
+    }
+
     // Check current directory
     char result[PATH_MAX];
     size_t count = readlink("/proc/self/exe", result, PATH_MAX);
@@ -32,19 +41,6 @@ int setup(){
     int main_result = system(main_folder_cmd.c_str());
     int temp_result = system(temp_folder_cmd.c_str());
     int data_result = system(data_folder_cmd.c_str());
-
-    cpr::Response r = cpr::Get(
-        cpr::Url{"https://localhost:1690/register"},
-        cpr::Ssl(
-            cpr::ssl::VerifyHost{false},
-            cpr::ssl::VerifyPeer{false}
-        )
-    );
-
-    if (r.status_code != 200) {
-        std::cout << "Proxy registration failed with status code: " << r.status_code << std::endl;
-        return 1;
-    }
 
     json uid = json::parse(r.text);
     int uid_num = uid["uid"];
@@ -96,7 +92,7 @@ int main(int argc, char* argv[]) {
             return 0;
         }
     } else {
-        std::cout << "Installation verrified" << std::endl;
+        std::cout << "Installation confirmed" << std::endl;
     }
 
     std::string response;
@@ -146,10 +142,24 @@ int main(int argc, char* argv[]) {
             }
         }
     } else {
+        
         std::string jsonPath = HOME_DIR + "/.wrens_nest/data/servers.json";
         std::ifstream jsonFile(jsonPath.c_str());
-        
         json serverData = json::parse(jsonFile);
+
+        std::string infoPath = HOME_DIR + "/.wrens_nest/data/info.json";
+        std::ifstream infoFile(infoPath.c_str());
+        json infoData = json::parse(infoFile);
+
+        cpr::Response r = cpr::Get(
+            cpr::Url{"http://localhost:1690/open/" + std::to_string(infoData["uid"].get<int>())}
+        );
+
+        if (r.status_code != 200 || std::stoi(r.text) != 0){
+            std::cout << "Failed to reach server through proxy, rerouting to direct ssh. This may take longer than normal" << std::endl;
+        } else {
+            std::cout << "Proxy reached connecting to servers" << std::endl;
+        }
 
         // for (auto& [key, value] : serverData.items()){
         //     if (key != "details"){

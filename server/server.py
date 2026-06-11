@@ -11,7 +11,7 @@ with open("clients.json", "r") as file:
 app = FastAPI()
 @app.get("/register")
 async def register():
-    uid = len(clients)
+    uid = len(clients) - 1
 
     clients[str(uid)] = {"status": 1} #status 1 is ofline, 0 is online
 
@@ -28,6 +28,9 @@ async def open_session(uid: int, request: Request):
     clients[str(uid)]["expi"] = expire
 
     clients[str(uid)]["status"] = 0
+
+    return 0
+
 
 @app.get("/wait/{uid}")
 async def wait(uid: int):
