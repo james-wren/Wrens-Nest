@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
         if (r.status_code != 200 || std::stoi(r.text) != 0){
             std::cout << "Failed to reach server through proxy, rerouting to direct ssh. This may take longer than normal" << std::endl;
         } else {
-            std::cout << "Proxy reached connecting to servers" << std::endl;
+            std::cout << "Proxy reached, connecting to servers" << std::endl;
         }
 
         // for (auto& [key, value] : serverData.items()){

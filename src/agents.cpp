@@ -52,6 +52,9 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
 
     const std::string AES_KEY = keyGen(name);
 
+    std::ifstream infoFile((HOME_DIR + "/.wrens_nest/data/info.json").c_str());
+    json info = json::parse(infoFile);
+
     // Create json for server
     int serverNum = getServerNum();
     json config;
@@ -61,6 +64,7 @@ int addServ(std::string name, std::string username, std::string ip, std::string 
     config["user"] = username;
     config["ip"] = ip;
     config["ssh_key"] = key_path;
+    config["uid"] = info["uid"];
     
     // Read current saved server data and save it as a variable to add to
     // Im done debugging ts, time to write the most bulletproof fucking code ever.
