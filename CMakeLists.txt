@@ -30,8 +30,7 @@ endif()
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # GO agent script embedding
-file(GLOB SCRIPTS "agent/agent")
-file(GLOB SCRIPTS "agent/agent_64")
+file(GLOB SCRIPTS "agent/agent" "agent/agent_64")
 
 foreach(SCRIPT ${SCRIPTS})
     get_filename_component(SCRIPT_NAME ${SCRIPT} NAME_WE)

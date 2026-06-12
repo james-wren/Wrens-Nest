@@ -1,28 +1,28 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/http"
+	"log"
+	"os"
 )
 
 func main() {
-	http.HandleFunc("/", handleRequest)
-
-	if err := http.ListenAndServe(":1690", nil); err != nil {
-		fmt.Printf("Server error %v\n", err)
-	}
-}
-
-func handleRequest(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-
-		return
+	type Config struct {
+		Uid int `json:"uid"`
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
+	fmt.Println("Reading File")
+	data, err := os.ReadFile("agent_config_transfer.json")
 
-	w.WriteHeader(http.StatusOK)
+	fmt.Println("File read")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	w.Write([]byte("Server up and running"))
+	var config Config
+	fmt.Println("Unmarshaling")
+	json.Unmarshal(data, &config)
+	fmt.Println("Unmarshalled")
+	fmt.Println(config.Uid)
 }
