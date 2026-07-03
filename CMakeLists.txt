@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(wn)
 
+include(CTest)
 include(FetchContent)
 
 FetchContent_Declare(
@@ -48,3 +49,11 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${EMBEDDED_HEADERS})
 
 target_link_libraries(wn PRIVATE OpenSSL::Crypto cpr::cpr ftxui::screen ftxui::dom ftxui::component)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+if(BUILD_TESTING)
+    add_executable(wn_client_tests tests/cpp/client_tests.cpp)
+    target_link_libraries(wn_client_tests PRIVATE OpenSSL::Crypto)
+    target_include_directories(wn_client_tests PRIVATE tests/cpp include)
+
+    add_test(NAME wn_client_tests COMMAND wn_client_tests)
+endif()

@@ -1,7 +1,6 @@
 build/
 .vscode/
 secrets/
-tests/
 .wakatime-project
 server/cert.pem
 server/key.pem
@@ -16,3 +15,4 @@ coverage/
 dist/
 *.log
 AGENTS.md
+build-tests/

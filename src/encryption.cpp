@@ -48,7 +48,7 @@ std::vector<uint8_t> decodeBase64(std::string stringb64){
 
     BIO* b64 = BIO_new(BIO_f_base64());
 
-    BIO_set_flags(bio, BIO_FLAGS_BASE64_NO_NL);
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 
     BIO* bio_chain = BIO_push(b64, bio);
 
