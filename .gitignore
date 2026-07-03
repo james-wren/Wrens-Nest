@@ -5,3 +5,14 @@ tests/
 .wakatime-project
 server/cert.pem
 server/key.pem
+server/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage/
+dist/
+*.log
+AGENTS.md
