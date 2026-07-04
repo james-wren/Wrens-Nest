@@ -53,7 +53,7 @@ Responsibilities:
 - Generate per-server AES keys.
 - Deploy the Go agent and agent config through SSH/SCP.
 - Render the terminal UI through FTXUI.
-- Send encrypted monitoring requests to agents.
+- Send command and monitoring requests through the proxy protocol.
 
 Important files:
 
@@ -72,7 +72,7 @@ Responsibilities:
 
 - Read its transferred config.
 - Coordinate with the proxy service.
-- Receive encrypted commands or status requests.
+- Receive command or status requests through the proxy service.
 - Decrypt requests using the server-specific AES key.
 - Return command output or status data.
 
@@ -93,11 +93,16 @@ Responsibilities:
 - Track online/offline status.
 - Hold command and response queues.
 - Provide streaming endpoints for connection coordination.
+- Serve as the required message path between clients and agents.
 
 Important files:
 
 - `server/server.py`
 - `server/clients.json`
+
+Protocol reference:
+
+- `docs/protocol.md` [Created by Codex]
 
 ## Data Flow
 
@@ -125,12 +130,14 @@ Important files:
 ### Monitoring Request
 
 1. Client reads server metadata from `~/.wrens_nest/data/servers.json`.
-2. Client builds a JSON request.
-3. Client encrypts the request with the server-specific AES key.
-4. Client sends the encrypted request to the server agent.
-5. Agent decrypts the request.
-6. Agent gathers requested data.
-7. Agent returns the result to the client.
+2. Client builds a proxy protocol command request.
+3. Client submits the request to the proxy for a specific server.
+4. Agent receives the queued request from the proxy.
+5. Agent validates and runs the requested status action.
+6. Agent posts output events and a final response back to the proxy.
+7. Client reads the final response from the proxy and updates the TUI.
+
+Command and monitoring payloads are defined in `docs/protocol.md`. [Created by Codex]
 
 ## Security Model
 

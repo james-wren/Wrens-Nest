@@ -5,7 +5,7 @@
 1. Define the project contract in more detail.
    - Lock down the exact responsibility of the client, agent, and proxy.
    - Decide which parts are required for the app to function and which are optional.
-   - Write the request/response shapes for the agent protocol.
+   - Write the request/response shapes for the proxy-required agent protocol. See `docs/protocol.md`. [Created by Codex]
 
 2. Stabilize first-run setup.
    - Make the install flow idempotent.
@@ -62,4 +62,3 @@
 - Add better error reporting in the TUI.
 - Add backup/export of local configuration.
 - Review whether direct SSH fallback should remain in the long-term design.
-
